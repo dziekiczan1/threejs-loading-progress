@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 /**
  * Loaders
@@ -21,14 +21,38 @@ const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
 
 /**
+ * Overlay
+ */
+const overlayGeometry = new THREE.PlaneGeometry(2, 2, 1, 1);
+const overlayMaterial = new THREE.ShaderMaterial({
+    transparent: true,
+    uniforms: {
+        uAlpha: { value: 1 }
+    },
+    vertexShader: `
+        void main() 
+        {
+            gl_Position = vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform float uAlpha;
+        
+        void main() 
+        {
+            gl_FragColor = vec4(0.0, 0.0, 0.0, uAlpha);
+        }
+    `,
+});
+const overlay = new THREE.Mesh(overlayGeometry, overlayMaterial);
+scene.add(overlay);
+
+/**
  * Update all materials
  */
-const updateAllMaterials = () =>
-{
-    scene.traverse((child) =>
-    {
-        if(child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial)
-        {
+const updateAllMaterials = () => {
+    scene.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
             // child.material.envMap = environmentMap;
             child.material.envMapIntensity = debugObject.envMapIntensity;
             child.material.needsUpdate = true;
@@ -62,10 +86,9 @@ debugObject.envMapIntensity = 2.5;
  */
 gltfLoader.load(
     '/models/FlightHelmet/glTF/FlightHelmet.gltf',
-    (gltf) =>
-    {
+    (gltf) => {
         gltf.scene.scale.set(10, 10, 10);
-        gltf.scene.position.set(0, - 4, 0);
+        gltf.scene.position.set(0, -4, 0);
         gltf.scene.rotation.y = Math.PI * 0.5;
         scene.add(gltf.scene);
 
@@ -81,7 +104,7 @@ directionalLight.castShadow = true;
 directionalLight.shadow.camera.far = 15;
 directionalLight.shadow.mapSize.set(1024, 1024);
 directionalLight.shadow.normalBias = 0.05;
-directionalLight.position.set(0.25, 3, - 2.25);
+directionalLight.position.set(0.25, 3, -2.25);
 scene.add(directionalLight);
 
 /**
@@ -92,8 +115,7 @@ const sizes = {
     height: window.innerHeight
 };
 
-window.addEventListener('resize', () =>
-{
+window.addEventListener('resize', () => {
     // Update sizes
     sizes.width = window.innerWidth;
     sizes.height = window.innerHeight;
@@ -112,7 +134,7 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
-camera.position.set(4, 1, - 4);
+camera.position.set(4, 1, -4);
 scene.add(camera);
 
 // Controls
@@ -136,8 +158,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 /**
  * Animate
  */
-const tick = () =>
-{
+const tick = () => {
     // Update controls
     controls.update();
 
