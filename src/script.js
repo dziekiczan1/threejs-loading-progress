@@ -1,19 +1,28 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { gsap } from 'gsap';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {gsap} from 'gsap';
 
 /**
  * Loaders
  */
+const loadingBarElement = document.querySelector('.loading-bar');
+const loadingTextElement = document.querySelector('.loading-text');
 const loadingManager = new THREE.LoadingManager(
     // Loaded
     () => {
-        gsap.to(overlayMaterial.uniforms.uAlpha, { duration: 3, value: 0 });
+        gsap.to(overlayMaterial.uniforms.uAlpha, {duration: 3, value: 0, delay: 1});
+        loadingBarElement.classList.add('ended');
+        loadingBarElement.style.transform = '';
+        loadingTextElement.textContent = '';
     },
 
     // Progress
-    () => {}
+    (itemUrl, itemsLoaded, itemsTotal) => {
+        const progressRatio = itemsLoaded / itemsTotal;
+        loadingBarElement.style.transform = `scaleX(${progressRatio})`;
+        loadingTextElement.textContent = `${Math.round(progressRatio * 100)}%`;
+    }
 );
 const gltfLoader = new GLTFLoader(loadingManager);
 const cubeTextureLoader = new THREE.CubeTextureLoader(loadingManager);
@@ -37,7 +46,7 @@ const overlayGeometry = new THREE.PlaneGeometry(2, 2, 1, 1);
 const overlayMaterial = new THREE.ShaderMaterial({
     transparent: true,
     uniforms: {
-        uAlpha: { value: 1 }
+        uAlpha: {value: 1}
     },
     vertexShader: `
         void main() 
